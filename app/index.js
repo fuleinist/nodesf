@@ -3,8 +3,8 @@ var express = require('express'),
 	morgan = require('morgan');
 
 var callbackUrl = "http://localhost:3030/auth/callback",
-	consumerKey = "<consumerKey>",
-	consumerSecret = "<consumerSecret>";
+	consumerKey = "consumerKey",
+	consumerSecret = "consumerSecret";
 
 var app = express();
 
@@ -22,8 +22,8 @@ app.get("/", function(request, response) {
 });
 
 app.get('/auth/callback', function(request, response) {
-	var authorizationCode = request.params.code;
-
+	console.log(request.query)
+	var authorizationCode = request.query.code;
 	oauth2.authenticate({
 		redirect_uri: callbackUrl,
 		client_id: consumerKey,
@@ -32,8 +32,8 @@ app.get('/auth/callback', function(request, response) {
 		// You can change loginUrl to connect to sandbox or prerelease env.
 		base_url: 'https://login.salesforce.com'
 	}, function(error, payload) {
-		console.log(JSON.stringify(payload))
-		console.log(error)
+		if(error) return response.send((JSON.stringify(error)));
+		if(payload) return response.send((JSON.stringify(payload)));
 		/*
 
 		The payload should contain the following fields:
