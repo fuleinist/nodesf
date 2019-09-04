@@ -1,12 +1,16 @@
+require('dotenv').config()
+
 var express = require('express'),
 	oauth2 = require('salesforce-oauth2'),
 	morgan = require('morgan');
 
-var callbackUrl = "http://localhost:3030/auth/callback",
-	consumerKey = "consumerKey",
-	consumerSecret = "consumerSecret";
+var callbackUrl = process.env.REDIRECT_URI || 'http://localhost:3030/auth/callback',
+	consumerKey = process.env.CLIENT_ID || "consumerKey",
+	consumerSecret = process.env.CLIENT_SECRET || "consumerSecret",
+	base_url = process.env.LOGIN_SERVER || 'https://login.salesforce.com';
 
 var app = express();
+var port = process.env.PORT || 3030;
 
 app.use(morgan('tiny'));
 
@@ -16,7 +20,7 @@ app.get("/", function(request, response) {
 		client_id: consumerKey,
 		scope: 'api', // 'id api web refresh_token'
 		// You can change loginUrl to connect to sandbox or prerelease env.
-		base_url: 'https://login.salesforce.com'
+		base_url
 	});
 	return response.redirect(uri);
 });
@@ -30,7 +34,7 @@ app.get('/auth/callback', function(request, response) {
 		client_secret: consumerSecret,
 		code: authorizationCode,
 		// You can change loginUrl to connect to sandbox or prerelease env.
-		base_url: 'https://login.salesforce.com'
+		base_url
 	}, function(error, payload) {
 		if(error) return response.send((JSON.stringify(error)));
 		if(payload) return response.send((JSON.stringify(payload)));
@@ -67,6 +71,6 @@ app.get('/auth/callback', function(request, response) {
 	});	
 });
 
-app.listen(3030, function() {
-	console.log("Listening on 3030");
+app.listen(port || 3030, function() {
+	console.log(`Listening on ${port}`);
 });
